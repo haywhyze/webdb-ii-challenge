@@ -17,4 +17,31 @@ server.get('/api/cars', async (req, res) => {
   }
 });
 
+server.post('/api/cars', async (req, res) => {
+  const { vin, make, mileage, model, status, transmission_type } = req.body;
+
+  if (!vin || !make || !mileage || !model) {
+    res.status(400).json({ errorMessage: 'one or more of the required field is not provided' });
+  }
+  else {
+    try {
+      const [newCarId] = await db('cars').insert({ 
+        vin, 
+        make, 
+        mileage, 
+        model, 
+        status, 
+        transmission_type 
+        });
+      if (newCarId) {
+        const newCar = await db('cars').where({ id: newCarId });
+        res.json(newCar);
+      }
+    } catch (error) {
+      console.log(error)
+      res.status(500).json({ message: 'Failed to create account' });
+    }
+  }
+})
+
 module.exports = server;
